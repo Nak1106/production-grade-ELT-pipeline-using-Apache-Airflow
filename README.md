@@ -37,7 +37,7 @@ This project is an **Airflow-based ETL/ELT pipeline** that processes user sessio
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/Nak1106/Assignment_6.git
-   cd your-repository-name
+   cd Assignment_6
    ```
 
 2. **Install required Python packages:**
