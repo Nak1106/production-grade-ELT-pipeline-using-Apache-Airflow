@@ -1,6 +1,3 @@
-Creating a `README.md` file is a great way to provide documentation for your project. Here's a template for the `README.md` that you can customize based on your project details:
-
----
 
 # ELT Summary Airflow Project
 
