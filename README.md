@@ -1,99 +1,119 @@
+# 🧾 ELT Summary with Airflow and Snowflake
 
-# ELT Summary Airflow Project
-
-## Overview
-
-This project is an **Airflow-based ETL/ELT pipeline** that processes user session data. It leverages Snowflake for data storage and transformations. The pipeline includes tasks such as creating temporary tables, performing primary key checks, checking for duplicate rows, and swapping tables for production-ready datasets.
-
-### Key Features
-- Extract data from Snowflake.
-- Perform **Create Table As Select (CTAS)** for user session data.
-- Run **primary key uniqueness checks** and ensure there are no duplicates.
-- Swap the temporary table with the main table.
+This project showcases a **production-grade ELT pipeline using Apache Airflow** to process user session data. It performs SQL-based transformations on Snowflake using tasks such as table creation, primary key and duplicate validation, and safe table swapping for production deployment.
 
 ---
 
-## Requirements
+## 🚀 Key Features
 
-1. **Airflow** (configured with Docker)
-2. **Snowflake** (with necessary credentials)
-3. **Python** (for custom operations and hooks)
-4. **GitHub** (for version control)
-
----
-
-## Installation
-
-### Prerequisites
-
-- You need to have **Docker** and **Airflow** installed and running in your development environment.
-- A **Snowflake account** with appropriate credentials (user, password, warehouse, database, schema).
-
-### Steps to Set Up the Project
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Nak1106/Assignment_6.git
-   cd Assignment_6
-   ```
-
-2. **Install required Python packages:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up Snowflake connection in Airflow:**
-   Ensure that you have configured the Snowflake connection (`snowflake_conn`) in Airflow's UI or `connections` configuration file.
-
-4. **Run Airflow:**
-   If you are using Docker, ensure Airflow is running:
-   ```bash
-   docker-compose up -d
-   ```
+- Automates **CTAS (Create Table As Select)** jobs  
+- Performs **Primary Key uniqueness checks**  
+- Detects and prevents **duplicate records**  
+- Uses **Snowflake Table Swapping** to update production tables without downtime  
+- Scheduled DAG runs with dependency control  
 
 ---
 
-## How It Works
+## ⚙️ Requirements
 
-1. **CTAS (Create Table As Select)**: 
-   - The `run_ctas` task creates a temporary table in Snowflake by selecting data from two tables (`user_session_channel` and `session_timestamp`).
-   - The SQL is customizable and can be edited for different data sources.
-
-2. **Primary Key Check**: 
-   - The pipeline ensures that the `sessionId` field is unique in the generated table. If duplicates are found, the pipeline will raise an error.
-
-3. **Duplicate Check**: 
-   - After creating the temporary table, the pipeline checks for any duplicate rows by comparing the total row count with the distinct row count.
-
-4. **Table Swap**:
-   - Once the temporary table is validated, it is swapped with the existing main table, making the new data available for use.
+- Python 3.x  
+- Docker & Docker Compose (for Airflow environment)  
+- Apache Airflow  
+- Snowflake account  
+- Valid Snowflake connection in Airflow (`snowflake_conn`)  
 
 ---
 
-## Example DAG
+## 🏗️ Project Setup
 
-```python
-from airflow.decorators import task
-from airflow import DAG
-from datetime import datetime
+### 1. Clone the Repository
 
-@task
-def run_ctas(database, schema, table, select_sql, primary_key=None):
-    # Function implementation goes here
-    pass
+```bash
+git clone https://github.com/Nak1106/Assignment_6.git
+cd Assignment_6
+```
 
-with DAG(
-    dag_id='ELT_Summary',
-    start_date=datetime(2024, 10, 3),
-    schedule='45 3 * * *'
-) as dag:
+### 2. Install Python Requirements
 
-    database = "dev"
-    schema = "analytics"
-    table = "session_summary"
-    select_sql = """SELECT u.*, s.ts
-    FROM dev.raw.user_session_channel u
-    JOIN dev.raw.session_timestamp s ON u.sessionId=s.sessionId
-    """
-    run_ctas(database, schema, table, select_sql, primary_key='sessionId')
-```  
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Configure Airflow Connections
+
+- Add `snowflake_conn` in the Airflow UI with your Snowflake credentials.  
+- Alternatively, use Airflow CLI to add the connection.
+
+### 4. Run Airflow (if using Docker)
+
+```bash
+docker-compose up -d
+```
+
+---
+
+## 📊 Workflow Summary
+
+### Session Data Ingestion DAG (`Session_Summary_ETL`)
+- Creates base tables: `user_session_channel` and `session_timestamp`
+- Stages and loads CSV files from S3 into Snowflake
+
+### ELT Summary DAG (`ELT_Summary`)
+- Creates a temporary summary table using a JOIN on session data
+- Verifies:
+  - **Primary Key Uniqueness** (`sessionId`)
+  - **No Duplicate Records**
+- If valid, swaps the temp table with the production table
+
+---
+
+## 🔍 Example SQL Logic
+
+```sql
+SELECT u.*, s.ts
+FROM dev.raw.user_session_channel u
+JOIN dev.raw.session_timestamp s ON u.sessionId = s.sessionId
+```
+
+---
+
+## 📁 File Breakdown
+
+| File                        | Purpose                                                                 |
+|-----------------------------|-------------------------------------------------------------------------|
+| `session_summary.py`        | DAG for CTAS, primary key check, deduplication, and table swapping      |
+| `user_session_channel.py`   | DAG for table creation and data ingestion from S3                       |
+| `requirements.txt`          | List of Python packages required for execution                          |
+| `README.md`                 | This documentation file                                                 |
+
+---
+
+## 🧠 Learning Outcomes
+
+- Build modular, scalable DAGs using Airflow  
+- Use Snowflake’s advanced SQL capabilities (e.g., `STAGE`, `CTAS`, `SWAP`)  
+- Implement data quality checks in production pipelines  
+- Automate safe deployment of transformed data to production tables  
+
+---
+
+## 📅 DAG Scheduling
+
+| DAG Name              | Schedule (UTC)     | Description                                     |
+|-----------------------|--------------------|-------------------------------------------------|
+| `Session_Summary_ETL` | Daily at 03:30 UTC | Creates raw tables and loads S3 data            |
+| `ELT_Summary`         | Daily at 03:45 UTC | Runs CTAS, PK check, deduplication, table swap  |
+
+---
+
+## 👨‍💻 Author
+
+**Nakshatra Desai**  
+Graduate Student – MS Data Analytics @ San Jose State University  
+📫 [LinkedIn](https://www.linkedin.com/in/nakshatra-desai-547a771b6/)
+
+---
+
+## 📌 Short Description (for GitHub Repo)
+
+> End-to-end ELT pipeline using Airflow and Snowflake to create production-ready session summaries. Includes CTAS, primary key validation, deduplication, and safe table swaps.
