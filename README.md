@@ -103,7 +103,3 @@ Graduate Student – MS Data Analytics @ SJSU
 📫 [LinkedIn](https://www.linkedin.com/in/nakshatra-desai-547a771b6/)
 
 ---
-
-## 📌 Repo Summary (for GitHub description)
-
-> End-to-end data pipeline using Airflow, Snowflake, and Superset to build Weekly Active User analytics from raw session data.
